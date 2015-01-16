@@ -39,8 +39,11 @@ class ORM extends BaseAdapterORM implements SluggableAdapter
                 $qb->andWhere('rec.'.$config['unique_base'].' = :unique_base');
                 $qb->setParameter(':unique_base', $ubase);
             } elseif (array_key_exists($config['unique_base'], $wrapped->getMetadata()->getAssociationMappings())) {
-                $associationMappings = $wrapped->getMetadata()->getAssociationMappings();
-                $qb->join($associationMappings[$config['unique_base']]['targetEntity'], 'unique_'.$config['unique_base']);
+                $qb->innerJoin('rec.'.$config['unique_base'],
+                    'unique_'.$config['unique_base'],
+                    'WITH',
+                    'unique_'.$config['unique_base'].'.id='.$wrapped->getPropertyValue($config['unique_base'])->getId()
+                );
             } else {
                 $qb->andWhere($qb->expr()->isNull('rec.'.$config['unique_base']));
             }
